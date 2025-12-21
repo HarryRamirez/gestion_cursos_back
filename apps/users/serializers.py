@@ -1,5 +1,5 @@
 from apps.users.models import User, Role
-from django.contrib.auth import authenticate
+from django.contrib.auth.models import Group
 from rest_framework import serializers
 
 
@@ -26,13 +26,22 @@ class RegisterSerializer(serializers.Serializer):
     )
 
     def create(self, validated_data):
+        role = validated_data['role']
         user = User(
             email=validated_data['email'],
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
-            role=validated_data['role'],
+            role=role,
         )
         user.set_password(validated_data['password'])
         user.save()
+        
+        # Asignamos Group según el Role
+        try:
+            group = Group.objects.get(name=role.name.capitalize())
+            user.groups.add(group)
+        except Group.DoesNotExist:
+            pass  
+        
         return user
 

@@ -1,11 +1,11 @@
 from django.shortcuts import render
-from rest_framework.permissions import IsAuthenticated
-from apps.users.permissions import IsInstructor, IsAdminOrInstructor
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from .models import Course
-from .serializers import GetListCourseSerializer
+from .serializers import GetListCourseSerializer, PostCourseLessonsSerializer
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 
@@ -18,7 +18,7 @@ class CoursePagination(PageNumberPagination):
     
 class CourseListAPIView(ListAPIView):
     
-    permission_classes = [IsAuthenticated, IsAdminOrInstructor]
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
     
     pagination_class = CoursePagination
     serializer_class = GetListCourseSerializer
@@ -26,9 +26,9 @@ class CourseListAPIView(ListAPIView):
     
     
     def get_queryset(self):
-        
+           
         queryset = Course.objects.filter(is_active=True, status='publicado')
-
+        
         search_title = self.request.query_params.get('search_title')
         search_category = self.request.query_params.get('search_category')
         search_instructor = self.request.query_params.get('search_instructor')
@@ -62,3 +62,75 @@ class CourseListAPIView(ListAPIView):
             })
             
         return super().list(queryset, *args, **kwargs)
+    
+    
+
+class CourseListByIntructorAPIView(ListAPIView):
+    
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    
+    pagination_class = CoursePagination
+    serializer_class = GetListCourseSerializer
+    
+    
+    
+    def get_queryset(self):
+        
+        user = self.request.user
+        
+        queryset = Course.objects.filter(instructor=user, is_active=True)
+        
+
+        search_title = self.request.query_params.get('search_title')
+        search_category = self.request.query_params.get('search_category')
+        search_status = self.request.query_params.get('search_status')
+        
+        
+        if search_title:
+            queryset = queryset.filter(Q(title__icontains=search_title))
+        if search_category:
+            queryset = queryset.filter(Q(category__name__icontains=search_category))
+        if search_status:
+            queryset = queryset.filter(Q(status__icontains=search_status))
+        
+        
+        queryset = queryset.order_by('created_at')
+
+        return queryset
+    
+    
+    def list(self, request, *args, **kwargs):
+        pagination = request.query_params.get('paginate', 'true').lower()
+        
+        queryset = self.get_queryset()
+        
+        if pagination == 'false':
+            serializer = self.get_serializer(queryset, many=True)
+            
+            return Response({
+                'count': queryset.count(),
+                'results': serializer.data
+            })
+            
+        return super().list(queryset, *args, **kwargs)
+
+
+
+
+class CourseCreateLessonAPIView(APIView):
+    
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    
+    def post(self, request):
+        
+        serilalizer = PostCourseLessonsSerializer(data=request.data)
+        
+        if serilalizer.is_valid():
+            course = serilalizer.save()
+            
+            return Response(PostCourseLessonsSerializer(course).data, status=status.HTTP_201_CREATED)
+        
+        return Response({'errors': serilalizer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+    

@@ -3,8 +3,7 @@ from apps.users.models import User
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RegisterSerializer, GetUserSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from apps.users.permissions import IsAdmin
+from rest_framework.permissions import IsAuthenticated, AllowAny, DjangoModelPermissions
 from rest_framework.views import APIView
 
 
@@ -12,7 +11,7 @@ from rest_framework.views import APIView
 
 class ListsUserAPIView(APIView):
     
-    permission_classes = [IsAuthenticated, IsAdmin] 
+    permission_classes = [IsAuthenticated, DjangoModelPermissions] 
     
     def get(self, request):
         
