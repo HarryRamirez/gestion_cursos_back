@@ -13,7 +13,7 @@ class LessonSerializer(serializers.ModelSerializer):
         read_only_fields = ['order']
 
 
-class GetListCourseSerializer(serializers.ModelSerializer):
+class CourseListSerializer(serializers.ModelSerializer):
     
     category = serializers.StringRelatedField()
     instructor = serializers.StringRelatedField()
@@ -29,7 +29,7 @@ class GetListCourseSerializer(serializers.ModelSerializer):
 # Se crea el curso y se la agraga el order incremental segun de las lessiones
 # tambien se agrega la transaccion para que solo se ejecute si todo esta bien 
 # esto para que no queden relaciones huerfanas
-class PostCourseLessonsSerializer(serializers.ModelSerializer):
+class CourseLessonCreateSerializer(serializers.ModelSerializer):
     
     lessons = LessonSerializer(many=True,  required=False)
     
@@ -58,7 +58,7 @@ class PostCourseLessonsSerializer(serializers.ModelSerializer):
 
 
 
-class UpdateCourseSerializer(serializers.ModelSerializer):
+class CourseUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Course
