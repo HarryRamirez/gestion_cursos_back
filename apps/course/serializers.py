@@ -35,14 +35,17 @@ class PostCourseLessonsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Course
-        fields = ['title', 'description', 'status', 'category', 'instructor', 'lessons']
+        fields = ['title', 'description', 'status', 'category', 'lessons']
     
     
     def create(self, validated_data):
+        
+        request = self.context['request']
+        instructor = request.user
         lessons_data = validated_data.pop('lessons', [])
 
         with transaction.atomic():
-            course = Course.objects.create(**validated_data)
+            course = Course.objects.create(instructor=instructor, **validated_data)
 
             for index, lesson_data in enumerate(lessons_data, start=1):
                 Lesson.objects.create(
@@ -52,3 +55,11 @@ class PostCourseLessonsSerializer(serializers.ModelSerializer):
                 )
 
         return course
+
+
+
+class UpdateCourseSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Course
+        fields = ['title', 'description', 'status', 'category']

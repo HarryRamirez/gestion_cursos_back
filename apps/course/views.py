@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from .models import Course
-from .serializers import GetListCourseSerializer, PostCourseLessonsSerializer
+from .serializers import GetListCourseSerializer, PostCourseLessonsSerializer, UpdateCourseSerializer
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 
@@ -120,10 +120,11 @@ class CourseListByIntructorAPIView(ListAPIView):
 class CourseCreateLessonAPIView(APIView):
     
     permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    queryset = Course.objects.all()
     
     def post(self, request):
         
-        serilalizer = PostCourseLessonsSerializer(data=request.data)
+        serilalizer = PostCourseLessonsSerializer(data=request.data, context={'request': request})
         
         if serilalizer.is_valid():
             course = serilalizer.save()
@@ -131,6 +132,53 @@ class CourseCreateLessonAPIView(APIView):
             return Response(PostCourseLessonsSerializer(course).data, status=status.HTTP_201_CREATED)
         
         return Response({'errors': serilalizer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+
+
+class CourseUpdateAPIView(APIView):
+
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    queryset = Course.objects.all()
+    
+    def put(self, request, pk):
+        
+        try:
+            course = Course.objects.get(pk=pk)
+        except Course.DoesNotExist:
+            return Response({'message': 'Curso no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = UpdateCourseSerializer(course, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+
+
+
+
+class CourseDeleteAPIView(APIView):
+    
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    queryset = Course.objects.all()
+    
+    
+    def delete(self , request, pk):
+    
+        try:
+            course = Course.objects.get(pk=pk, is_active=True)
+        except Course.DoesNotExist:
+            return Response({'message': 'curso no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
+        course.is_active=False
+        course.save()
+        
+        return Response({'message': 'curso eliminado con exito'}, status=status.HTTP_204_NO_CONTENT)
         
         
     
