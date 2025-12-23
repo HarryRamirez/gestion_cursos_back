@@ -67,18 +67,31 @@ class Lesson(models.Model):
 
 
 class Enrollment(models.Model):
+
+    STATUS_ACTIVE = 'activo'
+    STATUS_COMPLETED = 'completado'
+    STATUS_CANCELLED = 'cancelado'
+
+    STATUS_CHOICES = [
+        (STATUS_ACTIVE, 'Activo'),
+        (STATUS_COMPLETED, 'Completado'),
+        (STATUS_CANCELLED, 'Cancelado'),
+    ]
     
-    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='enrollments')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
     enrolled_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=20,
-        choices=[('activo', 'Activo'), ('completado', 'Completado'), ('cancelado', 'Cancelado')],
-        default='activo'
+        choices=STATUS_CHOICES,
+        default=STATUS_ACTIVE
     )
 
     class Meta:
         unique_together = ('student', 'course')
+    
+    def __str__(self):
+        return f"{self.course.title} -- {self.student.first_name} {self.student.last_name}"
 
 
 

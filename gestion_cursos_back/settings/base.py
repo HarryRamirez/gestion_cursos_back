@@ -56,10 +56,26 @@ LOCAL_APPS = [
 THIRD_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_yasg',
 ]
 
 
 INSTALLED_APPS = BASE_APPS + LOCAL_APPS + THIRD_APPS
+
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Token JWT: Bearer <token>'
+        }
+    },
+    'DEFAULT_INFO': 'config.urls.api_info',
+}
+
 
 
 MIDDLEWARE = [

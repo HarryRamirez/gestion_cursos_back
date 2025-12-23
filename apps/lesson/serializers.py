@@ -4,7 +4,7 @@ from django.db.models import Max
 
 
 
-class GetListLessonSerializer(serializers.ModelSerializer):
+class LessonListSerializer(serializers.ModelSerializer):
     course = serializers.StringRelatedField()
     class Meta:
         model = Lesson
@@ -14,7 +14,7 @@ class GetListLessonSerializer(serializers.ModelSerializer):
 
 
 
-class PostLessonSerializer(serializers.ModelSerializer):
+class LessonCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Lesson
@@ -38,7 +38,7 @@ class PostLessonSerializer(serializers.ModelSerializer):
     
 
 
-class UpdateLessonSerializer(serializers.ModelSerializer):
+class LessonUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Lesson
