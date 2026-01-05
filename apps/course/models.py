@@ -100,14 +100,17 @@ class Enrollment(models.Model):
 
 class LessonProgress(models.Model):
     
-    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='lessons_progress')
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='lessons_progress')
-    progress = models.DecimalField(max_digits=5, decimal_places=2)
+    progress = models.PositiveIntegerField(default=0)
     completed = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('student', 'lesson')
+        
+    def __str__(self):
+        return f'{self.student} --- {self.lesson} --- completado: {self.completed}'
 
 
 
@@ -124,3 +127,5 @@ class Review(models.Model):
     class Meta:
         unique_together = ('student', 'course')
 
+    def __str__(self):
+        return f'{self.student} --- {self.course}'

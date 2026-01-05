@@ -47,5 +47,7 @@ urlpatterns = [
     path('course/', include('apps.course.urls')),
     path('lesson/', include('apps.lesson.urls')),
     path('enrollment/', include('apps.enrollment.urls')),
+    path('lesson_progress/', include('apps.lesson_progress.urls')),
+    path('review/', include('apps.review.urls')),
 
 ]
